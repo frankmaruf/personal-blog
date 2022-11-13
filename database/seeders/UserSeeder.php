@@ -43,5 +43,6 @@ class UserSeeder extends Seeder
             'email_verified_at' => now(),
             "about_your_self" => "I am Viewer"
         ]);
+        \App\Models\User::factory(10)->create();
     }
 }

@@ -3,23 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
+use App\Models\User;
+use Auth;
 use Illuminate\Http\Request;
 
 class BlogController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api','verified:api'], ['except' => ['index,show,showBySlug']]);
+        // $this->authorizeResource(Blog::class);
+        $this->middleware(['auth:api','verified:api'], ['except' => ['showBySlug']]);
     }
     public function index()
     {
-        $posts = Blog::paginate(15);
+        $this->authorize("viewAny",Blog::class);
+        $blog = Blog::status()->paginate(15);
         return response()->json([
-            $posts
+            $blog
         ]);
     }
     public function store(Request $request)
     {
+        $this->authorize("create",Blog::class);
         $post = Blog::create([
             "title" => $request->title,
             "slug" => $request->slug,
@@ -30,18 +35,19 @@ class BlogController extends Controller
             "body" => $request->body,
             "user_id" => auth()->user()->id,
             "category_id" => $request->category_id,
-
         ]);
         return response($post);
     }
     public function show($id)
     {
-        $post = Blog::find($id);
+        $post = Blog::findOrFail($id);
+        $this->authorize("view",$post);
         return response($post);
     }
     public function showBySlug($slug)
     {
         $post = Blog::find($slug);
+        $this->authorize("view",$post);
         return response($post);
     }
     public function update(Request $request, $id)
@@ -56,7 +62,8 @@ class BlogController extends Controller
             "cover_image",
             "body",
             "user_id",
-            "category_id"
+            "category_id",
+            "status",
         ]);
         $updateData = $post->update($data);
         return response()->json($updateData);

@@ -21,8 +21,9 @@ class CreateBlogsTable extends Migration
             $table->string("meta_keywords")->nullable();
             $table->string("tags")->nullable();
             $table->string("cover_image");
-            $table->string("body");
-            $table->foreignId('user_id')->nullable()->references('id')->on('users');
+            $table->text("body");
+            $table->boolean('status')->default(0);
+            $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('categories_id')->nullable()->references('id')->on('categories');
             $table->timestamps();
         });
