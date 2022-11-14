@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Blog;
-use App\Models\User;
 use Auth;
 use Illuminate\Http\Request;
 
@@ -12,11 +11,11 @@ class BlogController extends Controller
     public function __construct()
     {
         // $this->authorizeResource(Blog::class);
-        $this->middleware(['auth:api','verified:api'], ['except' => ['showBySlug']]);
+        $this->middleware(['auth:api'], ['except' => ["show"]]);
     }
     public function index()
     {
-        $this->authorize("viewAny",Blog::class);
+        $this->authorize("viewAny", Blog::class);
         $blog = Blog::status()->paginate(15);
         return response()->json([
             $blog
@@ -24,7 +23,7 @@ class BlogController extends Controller
     }
     public function store(Request $request)
     {
-        $this->authorize("create",Blog::class);
+        $this->authorize("create", Blog::class);
         $post = Blog::create([
             "title" => $request->title,
             "slug" => $request->slug,
@@ -41,18 +40,19 @@ class BlogController extends Controller
     public function show($id)
     {
         $post = Blog::findOrFail($id);
-        $this->authorize("view",$post);
+        $this->authorize("view", $post);
         return response($post);
     }
     public function showBySlug($slug)
     {
-        $post = Blog::find($slug);
-        $this->authorize("view",$post);
+        $post = Blog::whereSlug($slug);
+        $this->authorize("view", $post);
         return response($post);
     }
     public function update(Request $request, $id)
     {
         $post = Blog::findOrFail($id);
+        $this->authorize("update", $post);
         $data = $request->only([
             'title',
             'slug',
@@ -70,7 +70,9 @@ class BlogController extends Controller
     }
     public function destroy($id)
     {
-        Blog::findOrFail($id)->delete();
+        $post = Blog::findOrFail($id);
+        $this->authorize("delete", $post);
+        $post->delete();
         return response()->json('Deleted Successfully');
     }
 }

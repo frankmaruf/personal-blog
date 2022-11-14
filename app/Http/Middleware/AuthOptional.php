@@ -2,8 +2,9 @@
 
 namespace App\Http\Middleware;
 use Closure;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
-class Authenticate extends Middleware
+class AuthOptional extends Middleware
 {
     /**
      * Get the path the user should be redirected to when they are not authenticated.
@@ -20,10 +21,15 @@ class Authenticate extends Middleware
 
     public function handle($request, Closure $next, ...$guards)
     {
-        if($atkn = $request->cookie('atkn')){
+       try{ if($atkn = $request->cookie('atkn')){
             $request->headers->set('Authorization', 'Bearer '.$atkn);
-        }
+        
         $this->authenticate($request, $guards);
-        return $next($request);
+    }}
+        catch(AuthenticationException $ex)
+    {
+
+    }
+    return $next($request);
     }
 }

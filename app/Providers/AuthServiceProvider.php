@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Gate;
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
-        'App\Models\Blog' => 'App\Policies\BlogPolicy',
+        // 'App\Models\Blog' => 'App\Policies\BlogPolicy',
     ];
 
     /**

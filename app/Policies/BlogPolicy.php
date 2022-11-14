@@ -4,7 +4,9 @@ namespace App\Policies;
 
 use App\Models\Blog;
 use App\Models\User;
+use Auth;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Auth\Access\Response;
 
 class BlogPolicy
 {
@@ -16,6 +18,7 @@ class BlogPolicy
      * @param  \App\Models\User  $user
      * @return \Illuminate\Auth\Access\Response|bool
      */
+
     public function viewAny(?User $user)
     {
         // if($user->hasAnyRole(["super-admin","admin"])){
@@ -31,18 +34,17 @@ class BlogPolicy
      * @param  \App\Models\Blog  $blog
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(?User $user, ?Blog $blog)
+    public function view(?User $user, Blog $post)
     {
-        if ($user->hasAnyRole(["super-admin", "admin"])) {
+        if ($post->status) {
             return true;
         }
-        if ($blog->status) {
-            return true;
-        };
-        if ($user->can('View Blog')) {
+        if (optional($user) === null) {
+            return false;
+        }
+        if (optional($user)->hasAnyRole(["super-admin", "admin"])) {
             return true;
         }
-        return $user->id == $blog->user_id;
     }
 
     /**
@@ -53,9 +55,7 @@ class BlogPolicy
      */
     public function create(User $user)
     {
-        if ($user->can('Create Blog')) {
-            return true;
-        }
+        return $user->can('Create Blog') ? Response::allow() : Response::deny("You don't haver permission");
     }
 
     /**
@@ -67,11 +67,12 @@ class BlogPolicy
      */
     public function update(User $user, Blog $blog)
     {
+        if ($user->can('Update Blog')) {
+            return $user->id == $blog->user_id ? Response::allow()
+                : Response::deny("You don't own or have enough permission for this post.");
+        }
         if ($user->hasAnyRole(["super-admin", "admin"])) {
             return true;
-        }
-        if ($user->can('Update Blog')) {
-            return $user->id == $blog->user_id;
         }
     }
 
@@ -85,13 +86,14 @@ class BlogPolicy
     public function delete(User $user, Blog $blog)
     {
         if ($user->can('Delete Blog')) {
-            return $user->id == $blog->user_id;
+            return $user->id == $blog->user_id ? Response::allow()
+                : Response::deny("You don't own or have enough permission for this post.");
         }
 
         if ($user->hasAnyRole(["super-admin", "admin"])) {
             return true;
         }
-        return $user->id === $blog->user_id;
+        // return $user->id === $blog->user_id;
     }
 
     /**

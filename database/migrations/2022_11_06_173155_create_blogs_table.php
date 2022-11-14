@@ -20,7 +20,7 @@ class CreateBlogsTable extends Migration
             $table->string("meta_description")->nullable();
             $table->string("meta_keywords")->nullable();
             $table->string("tags")->nullable();
-            $table->string("cover_image");
+            $table->string("cover_image")->nullable();
             $table->text("body");
             $table->boolean('status')->default(0);
             $table->foreignId('user_id')->references('id')->on('users');
