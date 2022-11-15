@@ -11,7 +11,7 @@ class RoleController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth:api','verified:api','role:super-admin'], ['except' => ['index,show']]);
+        $this->middleware(['auth:api','verified:api','role:super-admin'], ['except' => ['index',"show"]]);
     }
     public function index()
     {

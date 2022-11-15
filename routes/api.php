@@ -31,10 +31,10 @@ Route::group([
     Route::get('/me', [AuthController::class, 'me']);
     Route::group(['prefix' => 'admin'], function () {
         // Role
-        Route::get('/role', [RoleController::class, 'index']);
-        Route::post('/role', [RoleController::class, 'store']);
-        Route::get('/permission', [PermissionController::class, 'index']);
-        Route::post('/permission', [PermissionController::class, 'store']);
+        Route::get('/roles', [RoleController::class, 'index'])->middleware("role:super-admin|admin",'auth:api','verified:api');
+        Route::post('/roles', [RoleController::class, 'store']);
+        Route::get('/permissions', [PermissionController::class, 'index'])->middleware("role:super-admin|admin",'auth:api','verified:api',);
+        Route::post('/permissions', [PermissionController::class, 'store']);
         // Permission
 
         // Clear The Cache
