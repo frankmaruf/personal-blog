@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Blog;
 
+use App\Http\Controllers\Controller;
 use App\Models\Blog;
 use Auth;
 use Illuminate\Http\Request;
@@ -16,9 +17,9 @@ class BlogController extends Controller
     public function index()
     {
         $this->authorize("viewAny", Blog::class);
-        $blog = Blog::status()->paginate(15);
+        $post = Blog::status()->paginate(15);
         return response()->json([
-            $blog
+            $post
         ]);
     }
     public function store(Request $request)
