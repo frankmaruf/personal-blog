@@ -25,6 +25,7 @@ class CreateBlogsTable extends Migration
             $table->boolean('status')->default(0);
             $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('categories_id')->nullable()->references('id')->on('categories');
+            $table->unsignedBigInteger("reads")->default(0);
             $table->timestamps();
         });
     }

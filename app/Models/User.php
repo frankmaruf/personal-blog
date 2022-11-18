@@ -17,7 +17,7 @@ use Spatie\Permission\Models\Role;
  *
  * @property int $id
  * @property string $name
- * @property string|null $about_your_self
+ * @property string|null $bio
  * @property string $email
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password
@@ -70,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-        "about_your_self",
+        "bio",
         "picture",
         "cv",
     ];
@@ -103,7 +103,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return [];
     }
-    public function blog(): HasMany
+    public function posts(): HasMany
     {
         return $this->hasMany(Blog::class);
     }

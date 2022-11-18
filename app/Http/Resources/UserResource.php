@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Spatie\Permission\Models\Permission;
 
 class UserResource extends JsonResource
 {
@@ -15,8 +16,15 @@ class UserResource extends JsonResource
     public function toArray($request)
     {
         return [
+            "id" => $this->id,
+            "name" => $this->name,
+            "email" => $this->email,
+            "picture" => $this->picture,
+            "cv" => $this->cv,
+            "bio" => $this->bio,
             "Role" => $this->getRoleNames(),
-            "permission" => $this->getAllPermissions(),
+            "permission" => UserPermissionResource::collection($this->getAllPermissions()),
+            // 'posts' => PostResource::collection($this->posts()),
         ];
     }
 }

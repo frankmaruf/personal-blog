@@ -20,28 +20,28 @@ class UserSeeder extends Seeder
             "email" => "super-admin@mail.com",
             "password" => Hash::make("password"),
             'email_verified_at' => now(),
-            "about_your_self" => "I am Super Admin"
+            "bio" => "I am Super Admin"
         ])->assignRole('super-admin');
         User::create([
             'name' => "Admin",
             "email" => "admin@mail.com",
             "password" => Hash::make("password"),
             'email_verified_at' => now(),
-            "about_your_self" => "I am Admin"
+            "bio" => "I am Admin"
         ])->assignRole('admin');
         User::create([
             'name' => "Editor",
             "email" => "editor@mail.com",
             "password" => Hash::make("password"),
             'email_verified_at' => now(),
-            "about_your_self" => "I am Editor"
+            "bio" => "I am Editor"
         ])->assignRole('editor');
         User::create([
             'name' => "Viewer",
             'email' => 'viewer@mail.com',
             'password'=> Hash::make("password"),
             'email_verified_at' => now(),
-            "about_your_self" => "I am Viewer"
+            "bio" => "I am Viewer"
         ]);
         \App\Models\User::factory(10)->create();
     }

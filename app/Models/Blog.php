@@ -80,4 +80,8 @@ class Blog extends Model
     {
         return $query->where('status', 1);
     }
+    public function incrementReadCount() {
+        $this->reads++;
+        return $this->save();
+    }
 }

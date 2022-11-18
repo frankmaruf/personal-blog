@@ -25,7 +25,7 @@ class BlogFactory extends Factory
             "body" => $this->faker->paragraph(1),
             "status" => $this->faker->numberBetween(0, 1),
             "user_id" => User::all()->random()->id,
-            // "categories_id" => Category::all()->random()->id,
+            "categories_id" => Category::all()->random()->id,
         ];
     }
 }

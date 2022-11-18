@@ -15,11 +15,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolePermissionSeeder::class);
         $this->call(UserSeeder::class);
-        \App\Models\Blog::factory(10)->create();
         \App\Models\Category::create([
             "title" => "Sample",
             "meta_description" => "Sample Category"
         ]);
         \App\Models\Category::factory(10)->create();
+        \App\Models\Blog::factory(10)->create();
     }
 }
