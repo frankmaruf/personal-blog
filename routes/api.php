@@ -4,8 +4,8 @@ use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Blog\BlogController;
+use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\User\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -27,13 +27,17 @@ Route::group([
 ], function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/sign_up', [AuthController::class, 'registration']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
-    Route::get('/me', [AuthController::class, 'me']);
+
+    Route::group(['prefix' => 'auth'], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::get('me/posts', [BlogController::class, 'authUserPost']);
+    });
 
 
     Route::group(['prefix' => 'admin'], function () {
-        
+
         // Role
 
         Route::get('/roles', [RoleController::class, 'index'])->middleware("role:super-admin|admin", 'auth:api', 'verified:api');
@@ -49,6 +53,16 @@ Route::group([
         Route::get('/permissions/{id}', [PermissionController::class, 'show']);
         Route::put('/permissions/{id}', [PermissionController::class, 'update']);
         Route::delete('/permissions/{id}', [PermissionController::class, 'update']);
+
+        // Analytics
+        Route::group(['prefix' => 'analytics'], function () {
+            Route::get("",[\App\Http\Controllers\Admin\AnalyticsController::class,"index"]);
+            Route::get("top-blog",[\App\Http\Controllers\Admin\AnalyticsController::class,"topContent"]);
+            Route::get("top-browser",[\App\Http\Controllers\Admin\AnalyticsController::class,"topBrowser"]);
+            Route::get("mobile-traffic",[\App\Http\Controllers\Admin\AnalyticsController::class,"mobileTraffic"]);
+            Route::get("organic-search",[\App\Http\Controllers\Admin\AnalyticsController::class,"organicSearch"]);
+            Route::get("key-words",[\App\Http\Controllers\Admin\AnalyticsController::class,"keyWords"]);
+        });
 
         // Clear The Cache
 
@@ -67,7 +81,7 @@ Route::group([
     Route::group([
         'prefix' => 'blog'
     ], function () {
-        Route::get('posts', [BlogController::class, 'index']);
+        Route::get('posts', [BlogController::class, 'index'])->middleware("auth_optional:api");
         Route::get('latest', [BlogController::class, 'latestPost']);
         Route::get('top', [BlogController::class, 'topPost']);
         Route::get('posts/{id}', [BlogController::class, 'show'])->middleware("auth_optional:api");
@@ -75,6 +89,14 @@ Route::group([
         Route::post('posts/', [BlogController::class, 'store']);
         Route::patch('posts/{id}', [BlogController::class, 'update']);
         Route::post('posts/{id}', [BlogController::class, 'delete']);
+    });
+    // Category
+    Route::group([
+        'prefix' => 'categories'
+    ], function () {
+        Route::get('', [CategoryController::class, 'index']);
+        Route::get('{id}', [CategoryController::class, 'show']);
+        Route::get('{id}/posts', [CategoryController::class, 'categoryPost']);
     });
     // Users
     Route::group([
@@ -87,4 +109,3 @@ Route::group([
         Route::get('{id}/posts/', [UserController::class, 'showUserPost']);
     });
 });
-    

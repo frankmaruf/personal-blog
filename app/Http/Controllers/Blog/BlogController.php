@@ -17,11 +17,26 @@ class BlogController extends Controller
         // $this->authorizeResource(Blog::class);
         $this->middleware(['auth:api'], ['except' => ["index", "show", "latestPost", "showBySlug"]]);
     }
-    public function index()
+    public function index(Blog $blog)
     {
-        $this->authorize("viewAny", Blog::class);
+        $this->authorize("viewAny", $blog);
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->hasAnyRole(["super-admin", "admin"])) {
+                $post = Blog::orderBy('id', 'DESC')->paginate(15);
+                return PostResource::collection($post);
+            };
+        }
         $post = Blog::status()->orderBy('id', 'DESC')->paginate(15);
         return PostResource::collection($post);
+    }
+    public function authUserPost()
+    {
+        // if (Auth::check()) {
+            $id = Auth::user()->getId();
+        // }
+        $posts = Blog::where("user_id", $id)->orderBy('id', 'DESC')->paginate(15);
+        return PostResource::collection($posts);
     }
 
     public function latestPost()
@@ -52,23 +67,63 @@ class BlogController extends Controller
         ]);
         return new PostResource($post);
     }
-    public function show($id,Request $request)
+    // public function show($id)
+    // {
+    //     $post = Blog::findOrFail($id);
+    //     $this->authorize("view", $post);
+    //     $posts_id = array();
+    //     $posts_id[] = $post->id;
+    //     $cookie_name = ("posts_id");
+    //     if (Cookie::get($cookie_name) == '') {
+    //         $cookie = cookie($cookie_name, serialize($posts_id), 60 * 24 * 365); //set the cookie
+    //         $post->incrementReadCount(); //count the view
+    //         return response($post)
+    //             ->withCookie($cookie); //store the cookie
+    //     } else {
+    //         $cookie = Cookie::get($cookie_name);
+    //         $oldCookie = unserialize($cookie);
+    //         $alert = false;
+    //         $cookieLen = count($oldCookie);
+    //         $i = 0;
+    //         while ($i <= $cookieLen && !$alert) {
+    //             if ($oldCookie[$i] === $post->id) {
+    //                 $alert = true;
+    //                 $i++;
+    //             } else {
+    //                 $alert = false;
+    //                 $i++;
+    //             }
+    //         }
+    //         if ($alert) {
+    //             return response($post);
+    //         } else {
+    //             $oldCookie[] = $post->id;
+    //              var_dump($oldCookie);
+    //             $cookie = cookie($cookie_name, serialize(array($oldCookie)), 60 * 24 * 365); //set the cookie
+    //             $post->incrementReadCount();
+    //             return response($post)->withCookie($cookie);
+    //         }
+    //     }
+
+    //     return  response($post); //this view is not counted
+    // }
+    public function show($id, Request $request)
     {
         $post = Blog::findOrFail($id);
         $this->authorize("view", $post);
-        if(! Auth::check()){//guest user identified by ip
-            $cookie_name = (Str::replace('.','',($request->ip())).'-'. $post->id);
-            } else {
-                $cookie_name = (Auth::user()->id.'-'. $post->id);//logged in user
-            }
-            if(Cookie::get($cookie_name) == ''){//check if cookie is set
-                $cookie = cookie($cookie_name, '1', 60);//set the cookie
-                $post->incrementReadCount();//count the view
-                return response($post)
-                ->withCookie($cookie);//store the cookie
-            } else {
-                return  response($post);//this view is not counted
-            }
+        if (!Auth::check()) { //guest user identified by ip
+            $cookie_name = (Str::replace('.', '', ($request->ip())) . '-' . $post->id);
+        } else {
+            $cookie_name = (Auth::user()->id . '-' . $post->id); //logged in user
+        }
+        if (Cookie::get($cookie_name) == '') { //check if cookie is set
+            $cookie = cookie($cookie_name, '1', 60 * 24 * 365); //set the cookie
+            $post->incrementReadCount(); //count the view
+            return response($post)
+                ->withCookie($cookie); //store the cookie
+        } else {
+            return  response($post); //this view is not counted
+        }
     }
     public function showBySlug($slug)
     {

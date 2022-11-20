@@ -111,4 +111,8 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Project::class);
     }
+    public function getId()
+    {
+        return $this->id;
+    }
 }

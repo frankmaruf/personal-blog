@@ -59,14 +59,6 @@ class Blog extends Model
         "user_id",
         "categories_id",
     ];
-//    public function user(): HasOne
-//    {
-//        return $this->hasOne(User::class);
-//    }
-//    public function category(): HasOne
-//    {
-//        return $this->hasOne(Category::class, "category_id");
-//    }
     public function author() : BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

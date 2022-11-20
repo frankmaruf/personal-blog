@@ -21,9 +21,6 @@ class BlogPolicy
 
     public function viewAny(?User $user)
     {
-        // if($user->hasAnyRole(["super-admin","admin"])){
-        //     return true;
-        // }
         return true;
     }
 

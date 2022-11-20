@@ -20,6 +20,6 @@ class DatabaseSeeder extends Seeder
             "meta_description" => "Sample Category"
         ]);
         \App\Models\Category::factory(10)->create();
-        \App\Models\Blog::factory(10)->create();
+        \App\Models\Blog::factory(50)->create();
     }
 }

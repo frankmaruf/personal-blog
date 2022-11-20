@@ -50,6 +50,8 @@ class Category extends Model
         "meta_keywords",
         "cover_image",
         "parent_id",
+        "body",
+        "status"
     ];
     public function blogs(): HasMany
     {
