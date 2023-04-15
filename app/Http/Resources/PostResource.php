@@ -14,6 +14,7 @@ class PostResource extends JsonResource
      */
     public function toArray($request)
     {
+        
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -22,11 +23,13 @@ class PostResource extends JsonResource
             'meta_keywords' => $this->meta_keywords,
             'tags' => $this->tags,
             'cover_image'=> $this->cover_image,
+            'images'  => $this->getMedia('blog'),
             'body' => $this->body,
             'status' => $this->status,
             'user_id' => $this->user_id,
             'categories_id' => $this->categories_id,
             "reads" => $this->reads,
+            "premium" => $this->premium,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

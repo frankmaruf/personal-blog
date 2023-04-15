@@ -22,7 +22,8 @@ class CreateBlogsTable extends Migration
             $table->string("tags")->nullable();
             $table->string("cover_image")->nullable();
             $table->text("body");
-            $table->boolean('status')->default(0);
+            $table->boolean('premium');
+            $table->boolean('status');
             $table->foreignId('user_id')->references('id')->on('users');
             $table->foreignId('categories_id')->nullable()->references('id')->on('categories');
             $table->unsignedBigInteger("reads")->default(0);

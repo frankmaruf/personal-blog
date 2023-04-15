@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LoginRequest;
+use App\Http\Resources\AuthResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -32,6 +35,17 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    // public function login(LoginRequest $request): JsonResponse
+    // {
+    //     return (new AuthResource(auth()->user()))
+    //         ->response()
+    //         ->withCookie(
+    //             'atkn', 
+    //             auth()->getToken()->get(), 
+    //             config('jwt.ttl'), 
+    //             '/'
+    //         );
+    // }
     public function login(Request $request)
     {
         $request->validate([

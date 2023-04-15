@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Blog\BlogController;
 use App\Http\Controllers\Category\CategoryController;
+use App\Http\Controllers\Project\ProjectController;
 use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +22,6 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-
 Route::group([
     'middleware' => ['json.response'],
 ], function () {
@@ -34,34 +34,34 @@ Route::group([
         Route::get('/me', [AuthController::class, 'me']);
         Route::get('me/posts', [BlogController::class, 'authUserPost']);
     });
-
-
     Route::group(['prefix' => 'admin'], function () {
 
         // Role
-
-        Route::get('/roles', [RoleController::class, 'index'])->middleware("role:super-admin|admin", 'auth:api', 'verified:api');
-        Route::post('/roles', [RoleController::class, 'store']);
-        Route::get('/roles/{id}', [RoleController::class, 'show']);
-        Route::put('/roles/{id}', [RoleController::class, 'update']);
-        Route::delete('/roles/{id}', [RoleController::class, 'destroy']);
+        Route::group(['prefix' => 'roles'], function () {
+            Route::get('/', [RoleController::class, 'index'])->middleware("role:super-admin|admin", 'auth:api', 'verified:api');
+            Route::post('/', [RoleController::class, 'store']);
+            Route::get('/{id}', [RoleController::class, 'show']);
+            Route::put('/{id}', [RoleController::class, 'update']);
+            Route::delete('/{id}', [RoleController::class, 'destroy']);
+        });
 
         // Permission
-
-        Route::get('/permissions', [PermissionController::class, 'index'])->middleware("role:super-admin|admin", 'auth:api', 'verified:api',);
-        Route::post('/permissions', [PermissionController::class, 'store']);
-        Route::get('/permissions/{id}', [PermissionController::class, 'show']);
-        Route::put('/permissions/{id}', [PermissionController::class, 'update']);
-        Route::delete('/permissions/{id}', [PermissionController::class, 'update']);
+        Route::group(['prefix' => 'permissions'], function () {
+            Route::get('/', [PermissionController::class, 'index'])->middleware("role:super-admin|admin", 'auth:api', 'verified:api',);
+            Route::post('/', [PermissionController::class, 'store']);
+            Route::get('/{id}', [PermissionController::class, 'show']);
+            Route::put('/{id}', [PermissionController::class, 'update']);
+            Route::delete('/{id}', [PermissionController::class, 'update']);
+        });
 
         // Analytics
         Route::group(['prefix' => 'analytics'], function () {
-            Route::get("",[\App\Http\Controllers\Admin\AnalyticsController::class,"index"]);
-            Route::get("top-blog",[\App\Http\Controllers\Admin\AnalyticsController::class,"topContent"]);
-            Route::get("top-browser",[\App\Http\Controllers\Admin\AnalyticsController::class,"topBrowser"]);
-            Route::get("mobile-traffic",[\App\Http\Controllers\Admin\AnalyticsController::class,"mobileTraffic"]);
-            Route::get("organic-search",[\App\Http\Controllers\Admin\AnalyticsController::class,"organicSearch"]);
-            Route::get("key-words",[\App\Http\Controllers\Admin\AnalyticsController::class,"keyWords"]);
+            Route::get("", [\App\Http\Controllers\Admin\AnalyticsController::class, "index"]);
+            Route::get("top-blog", [\App\Http\Controllers\Admin\AnalyticsController::class, "topContent"]);
+            Route::get("top-browser", [\App\Http\Controllers\Admin\AnalyticsController::class, "topBrowser"]);
+            Route::get("mobile-traffic", [\App\Http\Controllers\Admin\AnalyticsController::class, "mobileTraffic"]);
+            Route::get("organic-search", [\App\Http\Controllers\Admin\AnalyticsController::class, "organicSearch"]);
+            Route::get("key-words", [\App\Http\Controllers\Admin\AnalyticsController::class, "keyWords"]);
         });
 
         // Clear The Cache
@@ -77,18 +77,40 @@ Route::group([
             });
         });
     });
-    // Post
+    // Blog
     Route::group([
         'prefix' => 'blog'
     ], function () {
-        Route::get('posts', [BlogController::class, 'index'])->middleware("auth_optional:api");
         Route::get('latest', [BlogController::class, 'latestPost']);
         Route::get('top', [BlogController::class, 'topPost']);
-        Route::get('posts/{id}', [BlogController::class, 'show'])->middleware("auth_optional:api");
-        Route::get('posts/{slug}', [BlogController::class, 'showBySlug'])->middleware("auth_optional:api");
-        Route::post('posts/', [BlogController::class, 'store']);
-        Route::patch('posts/{id}', [BlogController::class, 'update']);
-        Route::post('posts/{id}', [BlogController::class, 'delete']);
+        // Blog->Posts
+        Route::group(['prefix' => 'posts'], function () {
+            Route::post('', [BlogController::class, 'store']);
+            Route::patch('/{id}', [BlogController::class, 'update']);
+            Route::delete('/{id}', [BlogController::class, 'delete']);
+            // middleware
+            Route::group(['middleware' => 'auth_optional:api'], function () {
+                Route::get('', [BlogController::class, 'index']);
+                Route::get('/{id}', [BlogController::class, 'show']);
+                Route::get('/{slug}', [BlogController::class, 'showBySlug']);
+            });
+        });
+    });
+    // Projects
+    Route::group([
+        'prefix' => 'projects'
+    ], function () {
+        Route::get('latest', [ProjectController::class, 'latestPost']);
+        Route::get('top', [ProjectController::class, 'topPost']);
+            Route::post('', [ProjectController::class, 'store']);
+            Route::patch('/{id}', [ProjectController::class, 'update']);
+            Route::delete('/{id}', [ProjectController::class, 'delete']);
+            Route::get('/managers', [ProjectController::class, 'managers']);
+            Route::get('/{id}', [ProjectController::class, 'show']);
+            // middleware
+            Route::group(['middleware' => 'auth_optional:api'], function () {
+                Route::get('', [ProjectController::class, 'index']);
+            });
     });
     // Category
     Route::group([
@@ -102,10 +124,13 @@ Route::group([
     Route::group([
         'prefix' => 'users'
     ], function () {
-        Route::get('', [UserController::class, 'index']);
-        Route::get('{id}', [UserController::class, 'show'])->middleware("auth_optional:api");
-        Route::put('{id}', [UserController::class, 'show'])->middleware("auth_optional:api");
-        Route::delete('{id}', [UserController::class, 'show'])->middleware("auth_optional:api");
-        Route::get('{id}/posts/', [UserController::class, 'showUserPost']);
+        Route::get('/', [UserController::class, 'index']);
+        Route::get('/{id}/posts/', [UserController::class, 'showUserPost']);
+        // middleware
+        Route::group(['middleware' => 'auth_optional:api'], function () {
+            Route::get('/{id}', [UserController::class, 'show']);
+            Route::put('/{id}', [UserController::class, 'show']);
+            Route::delete('/{id}', [UserController::class, 'show']);
+        });
     });
 });

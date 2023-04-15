@@ -16,30 +16,30 @@ class AnalyticsController extends Controller
 
     public function index()
     {
-//        $period = Period::days(30);
-//        $metrics_total = 'ga:pageviews';
-//        $metrics_unique = 'ga:uniquePageviews';
-//        $dimensions_results = [
-//            'dimensions' => 'ga:pagePath',
-//            'filters' => 'ga:pagePath==/results',
-//        ];
-//        $dimensions_home = [
-//            'dimensions' => 'ga:pagePath',
-//            'filters' => 'ga:pagePath==/',
-//        ];
-//        $total_results = Analytics::performQuery($period, $metrics_total, $dimensions_results);
-//        $unique_results = Analytics::performQuery($period, $metrics_unique, $dimensions_results);
-//
-//        $total_home = Analytics::performQuery($period, $metrics_total, $dimensions_home);
-//        $unique_home = Analytics::performQuery($period, $metrics_unique, $dimensions_home);
-//        $analyticsData = Analytics::fetchMostVisitedPages(Period::days(30));
-//        return response()->json([
-//            "total_results" => $total_results,
-//            "unique_results" => $unique_results,
-//            "total_home" => $total_home,
-//            "unique_home" => $unique_home,
-//            "analyticsData" => $analyticsData,
-//        ]);
+    //    $period = Period::days(30);
+    //    $metrics_total = 'ga:pageviews';
+    //    $metrics_unique = 'ga:uniquePageviews';
+    //    $dimensions_results = [
+    //        'dimensions' => 'ga:pagePath',
+    //        'filters' => 'ga:pagePath==/results',
+    //    ];
+    //    $dimensions_home = [
+    //        'dimensions' => 'ga:pagePath',
+    //        'filters' => 'ga:pagePath==/',
+    //    ];
+    //    $total_results = Analytics::performQuery($period, $metrics_total, $dimensions_results);
+    //    $unique_results = Analytics::performQuery($period, $metrics_unique, $dimensions_results);
+
+    //    $total_home = Analytics::performQuery($period, $metrics_total, $dimensions_home);
+    //    $unique_home = Analytics::performQuery($period, $metrics_unique, $dimensions_home);
+    //    $analyticsData = Analytics::fetchMostVisitedPages(Period::days(30));
+    //    return response()->json([
+    //        "total_results" => $total_results,
+    //        "unique_results" => $unique_results,
+    //        "total_home" => $total_home,
+    //        "unique_home" => $unique_home,
+    //        "analyticsData" => $analyticsData,
+    //    ]);
         $top = Analytics::fetchTotalVisitorsAndPageViews(Period::days(30));
         return response($top);
     }

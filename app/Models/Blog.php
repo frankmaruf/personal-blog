@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Image\Manipulations;
 /**
  * App\Models\Blog
  *
@@ -44,9 +47,9 @@ use Illuminate\Database\Eloquent\Builder;
  * @property int $status
  * @method static \Illuminate\Database\Eloquent\Builder|Blog whereStatus($value)
  */
-class Blog extends Model
+class Blog  extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
     protected $guarded = ["id"];
     protected $fillable = [
         "title",
@@ -58,8 +61,18 @@ class Blog extends Model
         "body",
         "user_id",
         "categories_id",
+        "status",
+        "premium"
     ];
-    public function author() : BelongsTo
+    protected $attributes = [
+        'status' => true,
+        'premium' => false
+    ];
+    protected $casts = [
+        'premium' => 'boolean',
+        'status' => 'boolean',
+    ];
+    public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -72,8 +85,16 @@ class Blog extends Model
     {
         return $query->where('status', 1);
     }
-    public function incrementReadCount() {
+    public function incrementReadCount()
+    {
         $this->reads++;
         return $this->save();
+    }
+    public function registerMediaConversions(Media $media = null): void
+    {
+        $this
+            ->addMediaConversion('preview')
+            ->fit(Manipulations::FIT_CROP, 300, 300)
+            ->nonQueued();
     }
 }

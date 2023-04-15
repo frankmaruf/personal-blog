@@ -32,6 +32,6 @@ class RolePermissionSeeder extends Seeder
         $deleteProject = Permission::create(['name' => 'Delete Project']);
         $super->givePermissionTo([$createBlogPermission, $updateBlogPermission, $deleteBlogPermission, $createRoleAndPermission, $updateRoleAndPermission, $deleteRoleAndPermission,$createCategory,$updateCategory,$deleteCategory,$createProject,$updateProject,$deleteProject]);
         $admin->givePermissionTo([$createBlogPermission, $updateBlogPermission, $deleteBlogPermission,$createCategory,$updateCategory,$deleteCategory,$createProject,$updateProject,$deleteProject]);
-        $editor->givePermissionTo([$updateBlogPermission,$updateProject]);
+        $editor->givePermissionTo([$updateBlogPermission,$updateProject,$createBlogPermission]);
     }
 }

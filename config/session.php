@@ -196,6 +196,7 @@ return [
     |
     */
 
+    // 'same_site' => 'non',
     'same_site' => 'lax',
 
 ];

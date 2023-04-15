@@ -20,7 +20,7 @@ class CreateCategoriesTable extends Migration
             $table->string("meta_description")->nullable();
             $table->string("meta_keywords")->nullable();
             $table->string("cover_image")->nullable();
-            $table->text("body");
+            $table->text("body")->nullable();
             $table->boolean('status')->default(1);
             $table->foreignId("parent_id")->nullable()->references('id')->on('categories');
             $table->timestamps();

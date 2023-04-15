@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -74,7 +75,8 @@ class User extends Authenticatable implements JWTSubject
         "picture",
         "cv",
     ];
-
+   
+    
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -94,6 +96,13 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
+    protected $attributes = [
+        'notify_me' => false,
+        'picture' => "user.png",
+        'bio' => "My Default Bio"
+
+    ];
+
 
     public function getJWTIdentifier()
     {
@@ -107,9 +116,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Blog::class);
     }
-    public function projects(): HasMany
+    public function projects()
     {
-        return $this->hasMany(Project::class);
+        return $this->BelongsToMany(Project::class)->withPivot('is_manager');
     }
     public function getId()
     {

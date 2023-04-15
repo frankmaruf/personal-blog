@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Blog;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BlogRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Blog;
 use Auth;
 use Cookie;
 use Illuminate\Http\Request;
 use Str;
+use Validator;
 
 class BlogController extends Controller
 {
@@ -25,17 +27,14 @@ class BlogController extends Controller
             if ($user->hasAnyRole(["super-admin", "admin"])) {
                 $post = Blog::orderBy('id', 'DESC')->paginate(15);
                 return PostResource::collection($post);
-            };
+            }
         }
         $post = Blog::status()->orderBy('id', 'DESC')->paginate(15);
         return PostResource::collection($post);
     }
     public function authUserPost()
     {
-        // if (Auth::check()) {
-            $id = Auth::user()->getId();
-        // }
-        $posts = Blog::where("user_id", $id)->orderBy('id', 'DESC')->paginate(15);
+        $posts = Auth::user()->posts()->orderBy('id', 'DESC')->paginate(15);
         return PostResource::collection($posts);
     }
 
@@ -51,10 +50,12 @@ class BlogController extends Controller
         $post = Blog::orderBy('count', 'DESC')->skip(0)->take(10)->get();;
         return PostResource::collection($post);
     }
-    public function store(Request $request)
+    public function store(BlogRequest $request, Blog $blog)
     {
-        $this->authorize("create", Blog::class);
-        $post = Blog::create([
+        // $blog = Auth::user()->blogs()->create(request([
+        // ]));
+        $this->authorize("create", $blog);
+        $post = $blog::create([
             "title" => $request->title,
             "slug" => $request->slug,
             "meta_description" => $request->meta_description,
@@ -65,48 +66,17 @@ class BlogController extends Controller
             "user_id" => auth()->user()->id,
             "category_id" => $request->category_id,
         ]);
+        if ($request->hasFile('photo')) {
+            $post->addMultipleMediaFromRequest(['photo'])
+                ->each(function ($fileAdder) {
+                    $fileAdder->toMediaCollection('blog');
+                });
+        }
+        // ### Way 3:::
+        ##### in HTML
+        // <input type="file" name="photo[]" multiple />
         return new PostResource($post);
     }
-    // public function show($id)
-    // {
-    //     $post = Blog::findOrFail($id);
-    //     $this->authorize("view", $post);
-    //     $posts_id = array();
-    //     $posts_id[] = $post->id;
-    //     $cookie_name = ("posts_id");
-    //     if (Cookie::get($cookie_name) == '') {
-    //         $cookie = cookie($cookie_name, serialize($posts_id), 60 * 24 * 365); //set the cookie
-    //         $post->incrementReadCount(); //count the view
-    //         return response($post)
-    //             ->withCookie($cookie); //store the cookie
-    //     } else {
-    //         $cookie = Cookie::get($cookie_name);
-    //         $oldCookie = unserialize($cookie);
-    //         $alert = false;
-    //         $cookieLen = count($oldCookie);
-    //         $i = 0;
-    //         while ($i <= $cookieLen && !$alert) {
-    //             if ($oldCookie[$i] === $post->id) {
-    //                 $alert = true;
-    //                 $i++;
-    //             } else {
-    //                 $alert = false;
-    //                 $i++;
-    //             }
-    //         }
-    //         if ($alert) {
-    //             return response($post);
-    //         } else {
-    //             $oldCookie[] = $post->id;
-    //              var_dump($oldCookie);
-    //             $cookie = cookie($cookie_name, serialize(array($oldCookie)), 60 * 24 * 365); //set the cookie
-    //             $post->incrementReadCount();
-    //             return response($post)->withCookie($cookie);
-    //         }
-    //     }
-
-    //     return  response($post); //this view is not counted
-    // }
     public function show($id, Request $request)
     {
         $post = Blog::findOrFail($id);
@@ -122,7 +92,7 @@ class BlogController extends Controller
             return response($post)
                 ->withCookie($cookie); //store the cookie
         } else {
-            return  response($post); //this view is not counted
+            return new PostResource($post); //this view is not counted
         }
     }
     public function showBySlug($slug)
@@ -132,23 +102,21 @@ class BlogController extends Controller
         $post->incrementReadCount();
         return response($post);
     }
-    public function update(Request $request, $id)
+    public function update(BlogRequest $request, $id)
     {
         $post = Blog::findOrFail($id);
         $this->authorize("update", $post);
-        $data = $request->only([
-            'title',
-            'slug',
-            "meta_description",
-            "meta_keywords",
-            "tags",
-            "cover_image",
-            "body",
-            "category_id",
-            "status",
+        if ($request->hasFile('photo')) {
+            $post->addMultipleMediaFromRequest(['photo'])
+                ->each(function ($fileAdder) {
+                    $fileAdder->toMediaCollection('blog');
+                });
+        }
+        $post->update($request->validated());
+        return response()->json([
+            "Blog" => $post,
+            "message" => "Update Successfully"
         ]);
-        $updateData = $post->update($data);
-        return response()->json($updateData);
     }
     public function destroy($id)
     {

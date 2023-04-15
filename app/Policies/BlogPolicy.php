@@ -65,11 +65,8 @@ class BlogPolicy
     public function update(User $user, Blog $blog)
     {
         if ($user->can('Update Blog')) {
-            return $user->id == $blog->user_id ? Response::allow()
-                : Response::deny("You don't own or have enough permission for this post.");
-        }
-        if ($user->hasAnyRole(["super-admin", "admin"])) {
-            return true;
+            return $user->id == $blog->user_id || $user->hasAnyRole(["super-admin", "admin"]) ? Response::allow()
+            : Response::deny("You don't own or have enough permission for this post.");
         }
     }
 
@@ -83,14 +80,9 @@ class BlogPolicy
     public function delete(User $user, Blog $blog)
     {
         if ($user->can('Delete Blog')) {
-            return $user->id == $blog->user_id ? Response::allow()
+            return $user->id == $blog->user_id || $user->hasAnyRole(["super-admin", "admin"])? Response::allow()
                 : Response::deny("You don't own or have enough permission for this post.");
         }
-
-        if ($user->hasAnyRole(["super-admin", "admin"])) {
-            return true;
-        }
-        // return $user->id === $blog->user_id;
     }
 
     /**

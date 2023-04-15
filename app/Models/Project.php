@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Builder;
 /**
  * App\Models\Project
  *
@@ -47,10 +48,39 @@ class Project extends Model
         "description",
         "live",
         "source_code",
-        "users_id"
+        "status",
+        "premium"
     ];
-    public function user() : BelongsTo
+    protected $attributes = [
+        'status' => true,
+        'premium' => false,
+    ];
+    // public function users() : BelongsToMany
+    // {
+    //     return $this->belongsToMany(User::class);
+    // }
+
+    // public function users() : BelongsToMany
+    // {
+    //     return $this->belongsToMany(User::class)->withTimestamps()->using(ProjectUser::class)->withPivot(["is_manager"]);
+    // }
+    // public function managers()
+    // {
+    //     return $this->belongsToMany(User::class)->withPivot(["is_manager"])->wherePivot("is_manager","=",1)->withTimestamps();;
+    // }
+    public function users()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsToMany(User::class)
+            ->withPivot('is_manager')
+            ->withTimestamps();
     }
+
+    public function scopeStatus(Builder $query)
+    {
+        return $query->where('status', 1);
+    }
+    // public function managers()
+    // {
+    //     return $this->users()->wherePivot('is_manager',"=" ,1);
+    // }
 }

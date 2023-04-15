@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Response;
 
 class ProjectPolicy
 {
@@ -18,7 +19,7 @@ class ProjectPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return true;
     }
 
     /**
@@ -30,7 +31,15 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project)
     {
-        //
+        if ($project->status) {
+            return true;
+        }
+        if (optional($user) === null) {
+            return false;
+        }
+        if (optional($user)->hasAnyRole(["super-admin", "admin"])) {
+            return true;
+        }
     }
 
     /**
@@ -41,7 +50,8 @@ class ProjectPolicy
      */
     public function create(User $user)
     {
-        //
+        
+        return $user->can('Create Project') || $user->hasAnyRole(["super-admin", "admin"]) ? Response::allow() : Response::deny("You don't haver permission");
     }
 
     /**
@@ -53,7 +63,10 @@ class ProjectPolicy
      */
     public function update(User $user, Project $project)
     {
-        //
+        if ($user->can('Update Project')) {
+            return $user->id == $project->user_id || $user->hasAnyRole(["super-admin", "admin"]) ? Response::allow()
+                : Response::deny("You don't own or have enough permission for this project.");
+        }
     }
 
     /**
@@ -65,7 +78,12 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project)
     {
-        //
+        if ($user->can('Delete Project')) {
+            foreach ($project->users as $user_p) {
+                return $user->id == $user_p->pivot->is_manager || $user->hasAnyRole(["super-admin", "admin"]) ? Response::allow()
+                : Response::deny("You don't own or have enough permission for this Project.");
+            }
+        }
     }
 
     /**
